@@ -117,18 +117,23 @@ class Scene {
         var food = this.game.food;
         food.forEach((elem) => {
             var [x, y] = idxToCoord(elem, this.game.width);
-            this.drawPixel(x * this.pixelScale, y * this.pixelScale, 'white')
+            this.drawPixel(x * this.pixelScale, y * this.pixelScale, 'yellow')
         });
     }
 
     drawGameOver() {
         this.ctx.font = '72px arial';
-        this.ctx.fillText("Game Over", 100, 100);
+        this.ctx.textAlign = "center";
+        var widthCenter = this.game.width/2 * this.pixelScale;
+        this.ctx.fillText("Game Over", widthCenter, 100);
+        this.ctx.fillText("Press R to Restart", widthCenter, 500);
     }
 
     drawPause() {
+        this.ctx.textAlign = "center";
         this.ctx.font = '72px arial';
-        this.ctx.fillText("Pause", 100, 100);
+        var widthCenter = this.game.width/2 * this.pixelScale;
+        this.ctx.fillText("Pause", widthCenter, 100);
     }
 
 
@@ -153,8 +158,6 @@ class SnakeGame {
         this.height = height;
         this.food = new Set();
         this.snake = null;
-
-        this.score = 0;
         this.state = null;
 
         this.gameTime = null;
@@ -166,10 +169,15 @@ class SnakeGame {
     }
 
     initGame() {
-        this.snake = new Snake(0, 0, this.width, this.height);
+        this.snake = new Snake(Math.floor(this.width/2), Math.floor(this.height/2), this.width, this.height);
         this.snake.changeDirection(Directions.RIGHT);
         this.state = GameState.Alive;
         this.spawnRandomFood();
+    }
+
+    resetGame() {
+        this.food = new Set();
+        this.initGame();
     }
 
     spawnRandomFood() {
@@ -181,6 +189,10 @@ class SnakeGame {
     initControls() {
         document.addEventListener("keydown", event => {
             if (event.defaultPrevented) {
+                return;
+            }
+            if (event.code == "KeyR") {
+                this.resetGame();
                 return;
             }
             if (this.state == GameState.Alive) {
@@ -230,6 +242,7 @@ class SnakeGame {
             }
         }
         this.scene.draw();
+        score.innerText = "SCORE:" + this.snake.getParts().length;
         window.requestAnimationFrame(this.gameLoop);
     }
 
@@ -364,6 +377,8 @@ class Snake {
 }
 
 var canvas1 = document.getElementById('canvas');
+var canvas2 = document.getElementById('canvas2');
+var score = document.getElementById('score');
 const gameStep = 100;
 var game1 = new SnakeGame(40, 40, gameStep);
 var scene1 = new Scene(canvas1, game1, 0, 0, 10, 1.5);
